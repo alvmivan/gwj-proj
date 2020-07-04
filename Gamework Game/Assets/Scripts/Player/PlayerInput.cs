@@ -79,7 +79,7 @@ namespace Player
 
         public float MoveDir()
         {
-            return settings.rightKey.AnyGetKeyDown().AsAxis() - settings.leftKey.AnyGetKeyDown().AsAxis();
+            return settings.rightKey.AnyGetKey().AsAxis() - settings.leftKey.AnyGetKey().AsAxis();
         }
 
         public bool GoDown()

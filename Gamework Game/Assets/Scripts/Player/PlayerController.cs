@@ -26,6 +26,7 @@ namespace Player
             {
                 physics.CutJump();
             }
+            physics.Move(input.MoveDir());
         }
         
         

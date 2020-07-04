@@ -3,47 +3,40 @@ using UnityEngine;
 
 namespace Utils
 {
-    public class PhysicArea2D : MonoBehaviour
+        public delegate void TriggerHandler(Collider2D collider);
+    public abstract class PhysicArea2D : MonoBehaviour
     {
-        // por ahora lo implemento como circulo
+        private void OnValidate() => Init();
+        private void Start() => Init();
+        private void Reset() => Init();
+        protected virtual void Init()
+        {
+            gameObject.layer = 31;
+        }
         
-        public LayerMask layerMask = -1;
-        public float radius = 1;
-        private Collider2D[] results = new Collider2D[128];
+        private protected readonly Collider2D[] results = new Collider2D[128];
+        
+        [SerializeField] private protected LayerMask layerMask = -1;
+        public abstract bool Check<TComponent>(out TComponent component) where  TComponent : Component;
+        public abstract bool CheckAny();
+        public event TriggerHandler OnEnter;
+        public event TriggerHandler OnExit;
+        public event TriggerHandler OnStay;
 
 
-        public bool SearchFor<TComponent>(out TComponent component) where  TComponent : Component
+        private void OnTriggerEnter2D(Collider2D other)
         {
-            var count = Physics2D.OverlapCircleNonAlloc(transform.position, radius, results, layerMask);
-            for (var i = 0; i < count; ++i)
-            {
-                component = results[i].GetComponent<TComponent>();
-                if (component)
-                {
-                    return true;
-                }
-            }
-            component = null;
-            return false;
+            OnEnter?.Invoke(other);
         }
 
-
-        public bool SearchForAny()
+        private void OnTriggerExit2D(Collider2D other)
         {
-            return Physics2D.OverlapCircleNonAlloc(transform.position, radius, results, layerMask) > 0;
+            OnExit?.Invoke(other);
         }
 
-
-#if UNITY_EDITOR
-        private void OnDrawGizmosSelected()
+        private void OnTriggerStay2D(Collider2D other)
         {
-            Gizmos.color = new Color(.1f,.8f,.8f);
-            if (SearchForAny())
-            {
-                Gizmos.color = new Color(.8f,.8f,.1f);
-            }
-            Gizmos.DrawWireSphere(transform.position, radius);
+            OnStay?.Invoke(other);
         }
-#endif
     }
 }

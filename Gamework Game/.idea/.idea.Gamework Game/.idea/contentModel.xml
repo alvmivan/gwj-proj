@@ -15,7 +15,9 @@
           </e>
           <e p="SimpleCameraController.cs" t="Include" />
           <e p="Utils" t="Include">
+            <e p="CircleArea.cs" t="Include" />
             <e p="PhysicArea2D.cs" t="Include" />
+            <e p="RectArea2D.cs" t="Include" />
             <e p="VarTimeline.cs" t="Include" />
           </e>
         </e>
