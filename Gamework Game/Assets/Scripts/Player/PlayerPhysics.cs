@@ -9,6 +9,8 @@ namespace Player
         void Jump();
         void CutJump();
         void Move(float direction);
+        Vector2 Velocity { get; }
+        bool IsGrounded();
     }
 
 
@@ -77,6 +79,12 @@ namespace Player
         {
             inputDirection = direction;
             debugInputDirection.AddKey(Time.time, inputDirection);
+        }
+
+        public Vector2 Velocity => body.velocity;
+        public bool IsGrounded()
+        {
+            return IsLogicallyGrounded();
         }
 
         private void Start()
