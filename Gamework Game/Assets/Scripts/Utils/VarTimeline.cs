@@ -27,50 +27,13 @@ namespace Utils
     
     public class VarTimeline<T> 
     {
-     
-        private readonly List<Stamp<T>> timeline;
+        private Stamp<T> last;
+        public VarTimeline(T initialValue = default) => last = initialValue;
+        public T Value { get => last.Value; set => last = value; }
 
-        public VarTimeline(int cacheSize = 2, T initialValue = default)
+        public bool StillValid(float validityTime)
         {
-            timeline = new List<Stamp<T>>(cacheSize) {initialValue};
-        }
-
-        private void RotateListAndAppend(Stamp<T> elem)
-        {
-            var lastIndex = timeline.Count -1;
-            for (var i = 0; i < lastIndex; i++)
-            {
-                timeline[i] = timeline[i + 1];
-            }
-            timeline[lastIndex] = elem;
-        }
-
-        public IReadOnlyList<Stamp<T>> Timeline => timeline;
-
-        /// <summary>
-        ///hace cuanto lo asignaron
-        /// </summary>
-        public float ValueTime => Clock.Now() - timeline.Last().Time;
-    
-        public T Value
-        {
-            get => timeline.Last().Value;
-            set
-            {
-                if (FullCache())
-                {
-                    RotateListAndAppend(value);
-                }
-                else
-                {
-                    timeline.Add(value);
-                }            
-            }
-        }
-
-        private bool FullCache()
-        {
-            return timeline.Capacity == timeline.Count;
+            return Clock.Now() <= validityTime + last.Time;
         }
     }
 }

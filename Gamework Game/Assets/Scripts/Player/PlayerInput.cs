@@ -6,11 +6,9 @@ using Utils;
 
 namespace Player
 {
-    [Serializable]
-    public class InputSettings
+    [Serializable] class InputSettings
     {
-        public float jumpCacheTime;
-        public KeyCode jumpKey = KeyCode.Space;
+        public KeyCode[] jumpKey = {KeyCode.Space};
         public KeyCode[] leftKey = {KeyCode.LeftArrow, KeyCode.A};
         public KeyCode[] rightKey = {KeyCode.RightArrow, KeyCode.D};
         public KeyCode[] downKey = {KeyCode.DownArrow, KeyCode.S};
@@ -43,6 +41,18 @@ namespace Player
             }
             return false;
         }
+        public static bool AnyGetKeyUp(this KeyCode[] keys)
+        {
+            var length = keys.Length;
+            for (var i = 0; i < length; i++)
+            {
+                if (Input.GetKeyUp(keys[i]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public static float AsAxis(this bool value) => value ? 1 : 0;
     }
@@ -50,27 +60,21 @@ namespace Player
     public interface IPlayerInput
     {
         bool PressJump();
-        void ResetJumpTime(); // resets jump cache timer
-
         float MoveDir();
         bool GoDown();
 
+        bool ReleaseJump();
     }
     
     public class PlayerInput : MonoBehaviour, IPlayerInput
     {
         [SerializeField] private InputSettings settings;
         
-        private readonly VarTimeline<bool> jumpTimeline = new VarTimeline<bool>();
+        
 
         public bool PressJump()
         {
-            return jumpTimeline.Value && jumpTimeline.ValueTime <= settings.jumpCacheTime;
-        }
-
-        public void ResetJumpTime()
-        {
-            jumpTimeline.Value = false;
+            return settings.jumpKey.AnyGetKeyDown();
         }
 
         public float MoveDir()
@@ -83,12 +87,9 @@ namespace Player
             return settings.downKey.AnyGetKey();
         }
 
-        private void Update()
+        public bool ReleaseJump()
         {
-            if (Input.GetKeyDown(settings.jumpKey))
-            {
-                jumpTimeline.Value = true;
-            }
+            return settings.jumpKey.AnyGetKeyUp();
         }
     }
 }
