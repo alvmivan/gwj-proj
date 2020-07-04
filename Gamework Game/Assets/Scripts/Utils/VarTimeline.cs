@@ -48,11 +48,6 @@ namespace Utils
         public IReadOnlyList<Stamp<T>> Timeline => timeline;
 
         /// <summary>
-        /// cuando lo asignaron
-        /// </summary>
-        public float ValueMoment => timeline.Last().Time;
-        
-        /// <summary>
         ///hace cuanto lo asignaron
         /// </summary>
         public float ValueTime => Clock.Now() - timeline.Last().Time;

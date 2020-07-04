@@ -9,7 +9,7 @@
       <e p="Assets" t="Include">
         <e p="Scripts" t="Include">
           <e p="Player" t="Include">
-            <e p="PlayerPhysics.cs" t="Include" />
+            <e p="PlayerInput.cs" t="Include" />
           </e>
           <e p="SimpleCameraController.cs" t="Include" />
           <e p="Utils" t="Include">
