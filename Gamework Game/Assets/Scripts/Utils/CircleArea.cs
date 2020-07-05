@@ -19,7 +19,7 @@ namespace Utils
         {
             var localCenter = trigger.offset;
             var localRadius = trigger.radius;
-            var localScale = transform.localScale;
+            var localScale = transform.lossyScale;
             var worldCenter = transform.position + transform.rotation * (localCenter);
             var worldRadius = localRadius * Mathf.Min(Mathf.Abs(localScale.x), Mathf.Abs(localScale.y));
             return (worldCenter, worldRadius);

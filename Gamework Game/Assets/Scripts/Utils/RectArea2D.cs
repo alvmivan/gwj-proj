@@ -19,7 +19,7 @@ namespace Utils
         private ( Vector2, float) BoxAngle()
         {
             var angle = transform.rotation.eulerAngles.z;
-            var size = transform.localScale * trigger.size;
+            var size = transform.lossyScale * trigger.size;
             return (size, angle);
         }
         
