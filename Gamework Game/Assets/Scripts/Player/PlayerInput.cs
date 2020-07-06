@@ -64,13 +64,28 @@ namespace Player
         bool GoDown();
 
         bool ReleaseJump();
+        Vector2 WorldMouse();
     }
     
     public class PlayerInput : MonoBehaviour, IPlayerInput
     {
         [SerializeField] private InputSettings settings;
+        private IPlayerCamera playerCamera;
         
+        private Plane gamePlane = new Plane(Vector3.forward, 0); 
         
+        private void Start()
+        {
+            playerCamera = GetComponentInChildren<IPlayerCamera>();
+        }
+
+        public Vector2 WorldMouse()
+        {
+            var mouseRay = playerCamera.Camera.ScreenPointToRay(Input.mousePosition);
+            gamePlane.Raycast(mouseRay, out var dist);
+            return mouseRay.GetPoint(dist);
+        }
+
 
         public bool PressJump()
         {

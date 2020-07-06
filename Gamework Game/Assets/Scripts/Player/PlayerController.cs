@@ -5,13 +5,16 @@ namespace Player
 {
     public class PlayerController : MonoBehaviour
     {
+        [SerializeField] private GameObject weaponArmGO;
         private IPlayerInput input;
         private IPlayerPhysics physics;
+        private IPlayerArm weaponArm;
         
         private void Awake()
         {
             input = GetComponent<IPlayerInput>();
             physics = GetComponent<IPlayerPhysics>();
+            weaponArm = weaponArmGO.GetComponent<IPlayerArm>();
         }
 
 
@@ -26,7 +29,12 @@ namespace Player
             {
                 physics.CutJump();
             }
+            
             physics.Move(input.MoveDir());
+            
+            weaponArm.AimTo(input.WorldMouse());
+            
+            
         }
         
         
