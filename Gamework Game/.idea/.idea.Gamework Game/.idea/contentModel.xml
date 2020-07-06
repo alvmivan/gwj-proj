@@ -14,6 +14,10 @@
             <e p="PlayerController.cs" t="Include" />
             <e p="PlayerInput.cs" t="Include" />
             <e p="PlayerPhysics.cs" t="Include" />
+            <e p="RopeMechanics" t="Include">
+              <e p="PlayerRopeHand.cs" t="Include" />
+              <e p="RopeRender.cs" t="Include" />
+            </e>
           </e>
           <e p="SimpleCameraController.cs" t="Include" />
           <e p="Utils" t="Include">

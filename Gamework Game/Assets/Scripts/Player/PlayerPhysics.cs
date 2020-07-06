@@ -10,6 +10,7 @@ namespace Player
         void CutJump();
         void Move(float direction);
         Vector2 Velocity { get; }
+        void SetEnable(bool enable);
         bool IsGrounded();
     }
 
@@ -82,6 +83,13 @@ namespace Player
         }
 
         public Vector2 Velocity => body.velocity;
+        
+
+        public void SetEnable(bool enable)
+        {
+            enabled = enable;
+        }
+
         public bool IsGrounded()
         {
             return IsLogicallyGrounded();

@@ -1,4 +1,5 @@
 ﻿using System;
+using Player.RopeMechanics;
 using UnityEngine;
 
 namespace Player
@@ -9,12 +10,14 @@ namespace Player
         private IPlayerInput input;
         private IPlayerPhysics physics;
         private IPlayerArm weaponArm;
+        private IRopeHand ropeHand;
         
         private void Awake()
         {
             input = GetComponent<IPlayerInput>();
             physics = GetComponent<IPlayerPhysics>();
             weaponArm = weaponArmGO.GetComponent<IPlayerArm>();
+            ropeHand = GetComponent<IRopeHand>();
         }
 
 
@@ -30,10 +33,24 @@ namespace Player
                 physics.CutJump();
             }
             
+            
+            
+            
+            // weaponArm.AimTo(input.WorldMouse());
+
+            if (input.PressRopeShoot())
+            {
+                ropeHand.Shoot(input.MouseDirection(transform.position));
+            }
+
+            if (input.ReleaseRopeShoot())
+            {
+                ropeHand.Detach();   
+            }
+
+
+            physics.SetEnable(ropeHand.State != RopeState.Disconnected);
             physics.Move(input.MoveDir());
-            
-            weaponArm.AimTo(input.WorldMouse());
-            
             
         }
         

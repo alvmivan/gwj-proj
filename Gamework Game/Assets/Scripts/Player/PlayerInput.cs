@@ -65,12 +65,16 @@ namespace Player
 
         bool ReleaseJump();
         Vector2 WorldMouse();
+        bool PressRopeShoot();
+        Vector2 MouseDirection(Vector2 worldPoint);
+        bool ReleaseRopeShoot();
     }
     
     public class PlayerInput : MonoBehaviour, IPlayerInput
     {
         [SerializeField] private InputSettings settings;
         private IPlayerCamera playerCamera;
+        const int RopeMouseButton = 1;
         
         private Plane gamePlane = new Plane(Vector3.forward, 0); 
         
@@ -84,6 +88,23 @@ namespace Player
             var mouseRay = playerCamera.Camera.ScreenPointToRay(Input.mousePosition);
             gamePlane.Raycast(mouseRay, out var dist);
             return mouseRay.GetPoint(dist);
+        }
+        
+        public Vector2 MouseDirection(Vector2 worldPoint)
+        {
+            Vector2 screenSrc = playerCamera.Camera.WorldToScreenPoint(worldPoint);
+            Vector2 screenEnd = Input.mousePosition;
+            return (screenEnd - screenSrc).normalized;
+        }
+        
+
+        public bool PressRopeShoot()
+        {
+            return Input.GetMouseButtonDown(RopeMouseButton);
+        }
+        public bool ReleaseRopeShoot()
+        {
+            return Input.GetMouseButtonUp(RopeMouseButton);
         }
 
 
