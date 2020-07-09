@@ -32,7 +32,7 @@ namespace Player.RopeMechanics
         
         public LayerMask wallsMask;
 
-        SpringJoint2D currentJoint;
+        
 
         Rigidbody2D body;
         RaycastHit2D hit;
@@ -40,7 +40,7 @@ namespace Player.RopeMechanics
         Vector2 endRope;
 
         public Hand hand;
-        
+        bool ropeSaved;
 
         void Start()
         {
@@ -62,6 +62,8 @@ namespace Player.RopeMechanics
             {
                 return;
             }
+
+            ropeSaved = false;
             Clear(); // para evitar bugs
             hit = Physics2D.Raycast(shootPoint.position, direction, ropeLength, wallsMask);
             
@@ -80,34 +82,33 @@ namespace Player.RopeMechanics
         }
 
 
+        #if UNITY_EDITOR
         void OnGUI()
         {
             var rect = new Rect(10, 10, 150, 100);
-            GUI.Label(rect, "Rope State : "+State);
+            GUI.Label(rect, "Rope State : "+ State);
         }
+        #endif
 
 
         void OnConnectRope()
         {
             SetConnection();
             State = RopeState.Hang;
-            // currentJoint = gameObject.AddComponent<SpringJoint2D>();
-            // currentJoint.distance = Vector2.Distance(transform.position, hit.point);
-            // currentJoint.autoConfigureDistance = false;
-            // currentJoint.autoConfigureConnectedAnchor = false;
-            // currentJoint.connectedAnchor = hit.point;
         }
 
         void SetConnection()
         {
+            
             target = hit.rigidbody;
             targetOffset = hit.rigidbody.transform.InverseTransformPoint(hit.point);
-            SetHandRotation();
+            SetHandData();
         }
 
 
         void LateUpdate()
         {
+            float handRotationSpeed = 90;
             var pointPosition = shootPoint.position;
             if (State == RopeState.Hang)
             {
@@ -115,52 +116,73 @@ namespace Player.RopeMechanics
                 // currentJoint.connectedAnchor = GetTargetWorld;
                 // var dt = Time.deltaTime;
                 // currentJoint.distance = Mathf.MoveTowards(currentJoint.distance, 0, ropeSpeed * dt);
-                var toTarget = GetTargetWorld - pos;
+                var toTarget = TargetWorld - pos;
                 body.velocity = toTarget.normalized * ropeSpeed;
-                ropeRender.DrawRope(pointPosition, GetTargetWorld);
+                ropeRender.DrawRope(pointPosition, TargetWorld);
                 if (toTarget.magnitude < minDistance)
                 {
                     Clear();
                 }
+                
+                hand.transform.position = TargetWorld;
+                handRotationSpeed = 90;
             }
 
+            if (State == RopeState.Disconnected)
+            {
+                var handFar = Vector2.Distance(hand.transform.position, shootPoint.position) > 0.2;
+                if (handFar && !ropeSaved)
+                {
+                    hand.transform.position = Vector2.MoveTowards(hand.transform.position, shootPoint.position, Time.deltaTime * ropeSpeed );
+                    ropeRender.DrawRope(shootPoint.transform.position, hand.transform.position);
+                }
+                else
+                {
+                    hand.transform.position = shootPoint.position;
+                    ropeRender.HideRope();
+                    ropeSaved = true;
+                }
+                handRotationSpeed = 2;
+            }
+            
+            
+            
             if (State == RopeState.Shooting)
             {
-                endRope = Vector2.MoveTowards(endRope, GetTargetWorld, Time.deltaTime * ropeSpeed * 2);
-                if (Vector2.Distance(GetTargetWorld, endRope) < 0.1)
+                endRope = Vector2.MoveTowards(endRope, TargetWorld, Time.deltaTime * ropeSpeed * 2);
+                if (Vector2.Distance(TargetWorld, endRope) < 0.1)
                 {
-                    endRope = GetTargetWorld;
+                    endRope = TargetWorld;
                     OnConnectRope();
                 }
+                hand.transform.position = endRope;
                 ropeRender.DrawRope(pointPosition, endRope);
+                handRotationSpeed = 90;
             }
+            hand.transform.rotation = Quaternion.RotateTowards(hand.transform.rotation,shootPoint.transform.rotation,Time.deltaTime * handRotationSpeed * 10);
         }
 
-        Vector2 GetTargetWorld => target.transform.TransformPoint(targetOffset);
+        Vector2 TargetWorld => target.transform.TransformPoint(targetOffset);
 
         void Update()
         {
             if (State == RopeState.Hang || State == RopeState.Shooting)
             {
-                SetHandRotation();
+                SetHandData();
             }
         }
 
-        void SetHandRotation()
+        void SetHandData()
         {
             Vector2 pointPosition = shootPoint.position;
-            ropeArm.up = GetTargetWorld - pointPosition;
+            var targetWorld = TargetWorld;
+            ropeArm.up = targetWorld - pointPosition;
+            
         }
 
 
         void Clear()
         {
-            hand.Release();
-            ropeRender.HideRope();
-            if(currentJoint)
-            {
-                Destroy(currentJoint);
-            }
             State = RopeState.Disconnected;
         }
         
