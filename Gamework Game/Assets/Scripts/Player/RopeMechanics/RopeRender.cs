@@ -5,10 +5,10 @@ namespace Player.RopeMechanics
     public class RopeRender : MonoBehaviour
     {
         public LineRenderer line;
-        private int indexSrc;
-        private int indexEnd;
+        int indexSrc;
+        int indexEnd;
 
-        private void Start()
+        void Start()
         {
             line.positionCount = 2;
             indexSrc = 0;

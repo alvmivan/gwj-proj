@@ -16,7 +16,7 @@ namespace Utils
             trigger.isTrigger = true;
         }
 
-        private ( Vector2, float) BoxAngle()
+        ( Vector2, float) BoxAngle()
         {
             var angle = transform.rotation.eulerAngles.z;
             var size = transform.lossyScale * trigger.size;
@@ -47,7 +47,7 @@ namespace Utils
         }
 
 
-        private void OnDrawGizmosSelected()
+        void OnDrawGizmosSelected()
         {
             (Vector3 size, float angle) = BoxAngle();
             var rot = Quaternion.Euler(0, 0, angle);

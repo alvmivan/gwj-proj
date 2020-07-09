@@ -6,13 +6,13 @@ namespace Player
 {
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private GameObject weaponArmGO;
-        private IPlayerInput input;
-        private IPlayerPhysics physics;
-        private IPlayerArm weaponArm;
-        private IRopeHand ropeHand;
-        
-        private void Awake()
+        [SerializeField] GameObject weaponArmGO;
+        IPlayerInput input;
+        IPlayerPhysics physics;
+        IPlayerArm weaponArm;
+        IRopeHand ropeHand;
+
+        void Awake()
         {
             input = GetComponent<IPlayerInput>();
             physics = GetComponent<IPlayerPhysics>();
@@ -21,7 +21,7 @@ namespace Player
         }
 
 
-        private void Update()
+        void Update()
         {
             if (input.PressJump())
             {
@@ -48,8 +48,8 @@ namespace Player
                 ropeHand.Detach();   
             }
 
-
-            physics.SetEnable(ropeHand.State != RopeState.Disconnected);
+            physics.UpdateFaceRender();
+            physics.SetEnable(ropeHand.State == RopeState.Disconnected);
             physics.Move(input.MoveDir());
             
         }

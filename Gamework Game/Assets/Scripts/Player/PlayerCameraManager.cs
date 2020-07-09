@@ -13,14 +13,14 @@ namespace Player
 
     internal class PlayerCameraManager : MonoBehaviour, IPlayerCamera
     {
-        [SerializeField] private Camera cam;
+        [SerializeField] Camera cam;
 
-        private void Reset()
+        void Reset()
         {
             cam = Camera.main;
         }
 
-        private void Start()
+        void Start()
         {
             cam = Camera.main;
             var constraint = cam.gameObject.GetOrCreate<PositionConstraint>();

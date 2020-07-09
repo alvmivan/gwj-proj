@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Player.RopeMechanics
@@ -18,40 +19,59 @@ namespace Player.RopeMechanics
 
     public class PlayerRopeHand : MonoBehaviour , IRopeHand
     {
+        public float angleFromUpToThrowRope = 45;
         public float minDistance = 1;
-        public float uselessTime = 0.25f;
         public float ropeLength = 20;
         public float ropeSpeed = 20;
+        public Transform ropeArm;
         public RopeRender ropeRender;
         public Transform shootPoint;
 
-        private Vector2 targetOffset; // targetSpace
-        private Rigidbody2D target;
+        Vector2 targetOffset; // targetSpace
+        Rigidbody2D target;
         
         public LayerMask wallsMask;
 
-        private SpringJoint2D currentJoint;
+        SpringJoint2D currentJoint;
 
-        private Rigidbody2D body;
+        Rigidbody2D body;
+        RaycastHit2D hit;
 
-        private void Start()
+        Vector2 endRope;
+
+        public Hand hand;
+        
+
+        void Start()
         {
             body = GetComponent<Rigidbody2D>();
         }
 
-        public RopeState State { get; set; }
+        public RopeState State { get; set; } = RopeState.Disconnected;
+
+        bool ValidateDirection(Vector2 direction)
+        {
+            direction.Normalize();
+            return direction.y > Mathf.Sin(angleFromUpToThrowRope * Mathf.Deg2Rad);
+        }
+        
         
         public void Shoot(Vector2 direction)
         {
+            if (!ValidateDirection(direction))
+            {
+                return;
+            }
             Clear(); // para evitar bugs
-            var hit = Physics2D.Raycast(shootPoint.position, direction, ropeLength, wallsMask);
+            hit = Physics2D.Raycast(shootPoint.position, direction, ropeLength, wallsMask);
             
             var hitSomethingToHookOnto = hit.collider != null && hit.rigidbody != null && Vector2.Distance(hit.point, transform.position) > minDistance;
-            
+
             if (hitSomethingToHookOnto)
             {
+                SetConnection();
+                endRope = shootPoint.position;
                 State = RopeState.Shooting;
-                ThrowRope(hit);
             }
             else
             {
@@ -59,51 +79,86 @@ namespace Player.RopeMechanics
             }
         }
 
-        private void ThrowRope(RaycastHit2D hit)
+
+        void OnGUI()
         {
-            // todo : first the rope animation
-            OnConnectRope(hit);
+            var rect = new Rect(10, 10, 150, 100);
+            GUI.Label(rect, "Rope State : "+State);
         }
 
-        private void OnConnectRope(RaycastHit2D hit)
+
+        void OnConnectRope()
         {
+            SetConnection();
             State = RopeState.Hang;
-            currentJoint = gameObject.AddComponent<SpringJoint2D>();
-            currentJoint.distance = Vector2.Distance(transform.position, hit.point);
-            currentJoint.autoConfigureDistance = false;
-            currentJoint.autoConfigureConnectedAnchor = false;
-            currentJoint.connectedAnchor = hit.point;
+            // currentJoint = gameObject.AddComponent<SpringJoint2D>();
+            // currentJoint.distance = Vector2.Distance(transform.position, hit.point);
+            // currentJoint.autoConfigureDistance = false;
+            // currentJoint.autoConfigureConnectedAnchor = false;
+            // currentJoint.connectedAnchor = hit.point;
+        }
+
+        void SetConnection()
+        {
             target = hit.rigidbody;
             targetOffset = hit.rigidbody.transform.InverseTransformPoint(hit.point);
-            
+            SetHandRotation();
         }
 
 
-        private void LateUpdate()
+        void LateUpdate()
         {
+            var pointPosition = shootPoint.position;
             if (State == RopeState.Hang)
             {
                 Vector2 pos = transform.position;
-                Vector2 targetWorld = target.transform.TransformPoint(targetOffset);
-                currentJoint.connectedAnchor = targetWorld;
-                var dt = Time.deltaTime;
-                currentJoint.distance = Mathf.MoveTowards(currentJoint.distance, 0, ropeSpeed * dt);
-                ropeRender.DrawRope(shootPoint.position, currentJoint.connectedAnchor);
-                var toTarget = targetWorld - pos;
-                //body.velocity = toTarget.normalized * ropeSpeed;
+                // currentJoint.connectedAnchor = GetTargetWorld;
+                // var dt = Time.deltaTime;
+                // currentJoint.distance = Mathf.MoveTowards(currentJoint.distance, 0, ropeSpeed * dt);
+                var toTarget = GetTargetWorld - pos;
+                body.velocity = toTarget.normalized * ropeSpeed;
+                ropeRender.DrawRope(pointPosition, GetTargetWorld);
                 if (toTarget.magnitude < minDistance)
                 {
                     Clear();
                 }
             }
+
+            if (State == RopeState.Shooting)
+            {
+                endRope = Vector2.MoveTowards(endRope, GetTargetWorld, Time.deltaTime * ropeSpeed * 2);
+                if (Vector2.Distance(GetTargetWorld, endRope) < 0.1)
+                {
+                    endRope = GetTargetWorld;
+                    OnConnectRope();
+                }
+                ropeRender.DrawRope(pointPosition, endRope);
+            }
+        }
+
+        Vector2 GetTargetWorld => target.transform.TransformPoint(targetOffset);
+
+        void Update()
+        {
+            if (State == RopeState.Hang || State == RopeState.Shooting)
+            {
+                SetHandRotation();
+            }
+        }
+
+        void SetHandRotation()
+        {
+            Vector2 pointPosition = shootPoint.position;
+            ropeArm.up = GetTargetWorld - pointPosition;
         }
 
 
-        private void Clear()
+        void Clear()
         {
+            hand.Release();
+            ropeRender.HideRope();
             if(currentJoint)
             {
-                ropeRender.HideRope();
                 Destroy(currentJoint);
             }
             State = RopeState.Disconnected;

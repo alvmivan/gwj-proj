@@ -6,7 +6,7 @@ namespace Utils
     [RequireComponent(typeof(CircleCollider2D))]
     public class CircleArea : PhysicArea2D
     {
-        private CircleCollider2D trigger;
+        CircleCollider2D trigger;
 
         protected override void Init()
         {
@@ -15,7 +15,7 @@ namespace Utils
             trigger.isTrigger = true;
         }
 
-        private ( Vector2, float ) CenterRadius()
+        ( Vector2, float ) CenterRadius()
         {
             var localCenter = trigger.offset;
             var localRadius = trigger.radius;
@@ -50,7 +50,7 @@ namespace Utils
             return Physics2D.OverlapCircleNonAlloc(center, radius, results, layerMask) > 0;
         }
 
-        private void OnDrawGizmosSelected()
+        void OnDrawGizmosSelected()
         {
             var (center, radius) = CenterRadius();
             Gizmos.color = Color.yellow;

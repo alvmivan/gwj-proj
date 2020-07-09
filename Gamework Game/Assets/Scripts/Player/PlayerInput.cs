@@ -6,7 +6,8 @@ using Utils;
 
 namespace Player
 {
-    [Serializable] class InputSettings
+    [Serializable]
+    internal class InputSettings
     {
         public KeyCode[] jumpKey = {KeyCode.Space};
         public KeyCode[] leftKey = {KeyCode.LeftArrow, KeyCode.A};
@@ -72,13 +73,13 @@ namespace Player
     
     public class PlayerInput : MonoBehaviour, IPlayerInput
     {
-        [SerializeField] private InputSettings settings;
-        private IPlayerCamera playerCamera;
+        [SerializeField] InputSettings settings;
+        IPlayerCamera playerCamera;
         const int RopeMouseButton = 1;
-        
-        private Plane gamePlane = new Plane(Vector3.forward, 0); 
-        
-        private void Start()
+
+        Plane gamePlane = new Plane(Vector3.forward, 0);
+
+        void Start()
         {
             playerCamera = GetComponentInChildren<IPlayerCamera>();
         }

@@ -6,9 +6,9 @@ namespace Utils
         public delegate void TriggerHandler(Collider2D collider);
     public abstract class PhysicArea2D : MonoBehaviour
     {
-        private void OnValidate() => Init();
-        private void Start() => Init();
-        private void Reset() => Init();
+        void OnValidate() => Init();
+        void Start() => Init();
+        void Reset() => Init();
         protected virtual void Init()
         {
             gameObject.layer = 31;
@@ -24,17 +24,17 @@ namespace Utils
         public event TriggerHandler OnStay;
 
 
-        private void OnTriggerEnter2D(Collider2D other)
+        void OnTriggerEnter2D(Collider2D other)
         {
             OnEnter?.Invoke(other);
         }
 
-        private void OnTriggerExit2D(Collider2D other)
+        void OnTriggerExit2D(Collider2D other)
         {
             OnExit?.Invoke(other);
         }
 
-        private void OnTriggerStay2D(Collider2D other)
+        void OnTriggerStay2D(Collider2D other)
         {
             OnStay?.Invoke(other);
         }

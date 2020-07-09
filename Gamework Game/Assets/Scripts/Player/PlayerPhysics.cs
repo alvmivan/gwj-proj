@@ -12,6 +12,7 @@ namespace Player
         Vector2 Velocity { get; }
         void SetEnable(bool enable);
         bool IsGrounded();
+        void UpdateFaceRender();
     }
 
 
@@ -107,7 +108,7 @@ namespace Player
             UpdateFaceRender();
         }
 
-        void UpdateFaceRender()
+        public void UpdateFaceRender()
         {
             if (Mathf.Abs(Velocity.x) < 0.01) return;
             var scale = renderTransform.localScale;

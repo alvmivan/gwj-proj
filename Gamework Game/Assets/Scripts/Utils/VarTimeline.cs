@@ -27,7 +27,7 @@ namespace Utils
     
     public class VarTimeline<T> 
     {
-        private Stamp<T> last;
+        Stamp<T> last;
         public VarTimeline(T initialValue = default) => last = initialValue;
         public T Value { get => last.Value; set => last = value; }
 

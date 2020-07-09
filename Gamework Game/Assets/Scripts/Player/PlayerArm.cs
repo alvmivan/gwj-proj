@@ -11,23 +11,23 @@ public interface IPlayerArm
     Vector2 ShootPoint { get; }
 }
 
-class PlayerArm : MonoBehaviour , IPlayerArm
+internal class PlayerArm : MonoBehaviour , IPlayerArm
 {
-    [SerializeField] private GameObject player;
-    [SerializeField] private Transform shootPoint;
+    [SerializeField] GameObject player;
+    [SerializeField] Transform shootPoint;
 
-    private Vector2 realDirection = Vector2.down + Vector2.right;
-    private Vector2 renderedDirection;
+    Vector2 realDirection = Vector2.down + Vector2.right;
+    Vector2 renderedDirection;
 
-    [SerializeField] private float minAngle = 1;
+    [SerializeField] float minAngle = 1;
 
 
     public void AimTo(Vector2 point)
     {
         realDirection = (Vector3) point - transform.position;
     }
-    
-    private void FixedUpdate()
+
+    void FixedUpdate()
     {
         const float armDampRotation = 50f;
         
