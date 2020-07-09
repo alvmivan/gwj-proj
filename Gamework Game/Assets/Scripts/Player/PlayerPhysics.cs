@@ -18,47 +18,46 @@ namespace Player
     internal class PlayerPhysics : MonoBehaviour, IPlayerPhysics
     {
         //inspector fields
-        [Header("Jump")]
-        public float jumpVelocity = 5f;
+        [Header("Jump")] public float jumpVelocity = 5f;
         public float cacheJumpTime = 0.2f;
         public float coyoteTime = 0.2f;
         public int maxAirJumps = 1;
         public PhysicArea2D feetArea;
-        [Space(20), Header("Run")] 
-        public float airAcceleration = 5;
+        [Space(20), Header("Run")] public float airAcceleration = 5;
         public float groundAcceleration = 10;
         public float breakAcceleration = 20;
         public float maxSpeed = 10;
-        
+        public Transform renderTransform;
+
         //variables
-        private Rigidbody2D body;
-        private VarTimeline<bool> isGrounded;
-        private VarTimeline<bool> jump;
-        private int currentAirJumps;
-        private float inputDirection;
-        
-        private void Awake()
+        Rigidbody2D body;
+        VarTimeline<bool> isGrounded;
+        VarTimeline<bool> jump;
+        int currentAirJumps;
+        float inputDirection;
+
+        void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             isGrounded = new VarTimeline<bool>();
             jump = new VarTimeline<bool>();
         }
 
-        private bool IsLogicallyGrounded()
+        bool IsLogicallyGrounded()
         {
             return isGrounded.Value && isGrounded.StillValid(coyoteTime);
         }
 
-        private bool WannaJump()
+        bool WannaJump()
         {
             return jump.Value && jump.StillValid(cacheJumpTime);
         }
-        
-        private bool CanDoSecondJump()
+
+        bool CanDoSecondJump()
         {
             return currentAirJumps > 0;
         }
-        
+
         public void Jump()
         {
             jump.Value = true;
@@ -76,6 +75,7 @@ namespace Player
         }
 
         public AnimationCurve debugInputDirection;
+
         public void Move(float direction)
         {
             inputDirection = direction;
@@ -83,7 +83,7 @@ namespace Player
         }
 
         public Vector2 Velocity => body.velocity;
-        
+
 
         public void SetEnable(bool enable)
         {
@@ -95,24 +95,36 @@ namespace Player
             return IsLogicallyGrounded();
         }
 
-        private void Start()
+        void Start()
         {
             ResetAirJumps();
         }
 
-        private void Update()
+        void Update()
         {
             UpdateGrounded();
             UpdateJump();
+            UpdateFaceRender();
         }
 
-        private void FixedUpdate()
+        void UpdateFaceRender()
+        {
+            if (Mathf.Abs(Velocity.x) < 0.01) return;
+            var scale = renderTransform.localScale;
+            scale.x = Mathf.Sign(Velocity.x);
+            renderTransform.localScale = scale;
+
+        }
+
+        void FixedUpdate()
         {
             var dt = Time.fixedDeltaTime;
             UpdateRun(dt);
+            
         }
 
-        private void UpdateRun(float dt)
+
+        void UpdateRun(float dt)
         {
             var velocity = body.velocity;
             var desiredSpeed = maxSpeed * inputDirection;
@@ -129,11 +141,12 @@ namespace Player
             {
                 currentAcceleration = breakAcceleration;
             }
+
             velocity.x = Mathf.MoveTowards(velocity.x, desiredSpeed, dt * currentAcceleration);
             body.velocity = velocity;
         }
 
-        private void UpdateJump()
+        void UpdateJump()
         {
             if (WannaJump())
             {
@@ -151,36 +164,37 @@ namespace Player
             }
         }
 
-        private void PerformAirJump()
+        void PerformAirJump()
         {
             currentAirJumps--;
             PerformJump();
         }
 
-        private void ResetAirJumps()
+        void ResetAirJumps()
         {
             currentAirJumps = maxAirJumps;
         }
 
-        private void UpdateGrounded()
+        void UpdateGrounded()
         {
             if (IsPhysicallyGrounded())
             {
                 isGrounded.Value = true;
                 ResetAirJumps();
             }
+
             if (!IsPhysicallyGrounded() && IsLogicallyGrounded())
             {
                 isGrounded.Value = false;
             }
         }
 
-        private bool IsPhysicallyGrounded()
+        bool IsPhysicallyGrounded()
         {
             return feetArea.CheckAny();
         }
 
-        private void PerformJump()
+        void PerformJump()
         {
             jump.Value = false;
             isGrounded.Value = false;
@@ -189,6 +203,4 @@ namespace Player
             body.velocity = velocity;
         }
     }
-
-    
 }
